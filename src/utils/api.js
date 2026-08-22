@@ -1,7 +1,8 @@
 export const API_BASE =
-  window.location.port === "80" || !window.location.port
+  import.meta.env.VITE_API_BASE ||
+  (window.location.port === "80" || !window.location.port
     ? `${window.location.origin}/yamini/backend`
-    : "http://localhost/yamini/backend";
+    : "http://localhost/yamini/backend");
 
 export async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
