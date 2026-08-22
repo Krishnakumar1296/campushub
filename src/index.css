@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-navy-950: #05091b;
+  --color-navy-900: #0a1128;
+  --color-navy-850: #0d1530;
+  --color-navy-800: #131c3a;
+  --color-navy-700: #1b2749;
+
+  --animate-fade-in: fade-in 0.25s ease-out both;
+  --animate-scale-in: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-up: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-slide-in-right: slide-in-right 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-ping-slow: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes ping-slow {
+  0% { transform: scale(1); opacity: 0.6; }
+  80%, 100% { transform: scale(1.9); opacity: 0; }
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-[#f2f4fb] text-slate-800 antialiased;
+  }
+  .dark body {
+    @apply bg-[#060a18] text-slate-200;
+  }
+  ::selection {
+    @apply bg-violet-600/30;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124, 58, 237, 0.35) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-violet-600/25 hover:bg-violet-600/40;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  .btn-gradient {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 font-semibold text-white shadow-md shadow-violet-600/25 transition-all duration-300 hover:shadow-lg hover:shadow-violet-500/40 hover:brightness-110 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-55 disabled:shadow-none;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700 active:scale-[0.98] dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:border-violet-400/40 dark:hover:bg-violet-500/10 dark:hover:text-violet-300;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 font-semibold text-white shadow-md shadow-red-600/25 transition-all duration-200 hover:bg-red-500 active:scale-[0.98];
+  }
+  .card {
+    @apply rounded-2xl border border-slate-200/70 bg-white shadow-sm transition-shadow dark:border-white/[0.07] dark:bg-navy-900;
+  }
+  .input {
+    @apply w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition-all focus:border-violet-400 focus:bg-white focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-violet-400/50 dark:focus:bg-white/[0.06];
+  }
+  .label {
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+  }
+  .icon-btn {
+    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-slate-300 transition-all duration-200 hover:bg-white/10 hover:text-white active:scale-95;
+  }
+  .badge-soft {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold;
+  }
+  .nav-link {
+    @apply rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/[0.07] hover:text-white;
+  }
+  .nav-link-active {
+    @apply bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-900/50;
+  }
+  .th {
+    @apply whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500;
+  }
+  .td {
+    @apply whitespace-nowrap px-4 py-3.5 text-sm text-slate-600 dark:text-slate-300;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
