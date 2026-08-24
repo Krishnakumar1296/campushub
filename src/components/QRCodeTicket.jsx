@@ -1,17 +1,43 @@
+import { useRef } from "react";
 import Modal from "./Modal";
-import { QRCodeSVG } from "qrcode.react";
-import { CalendarDays, Clock, MapPin, ShieldCheck, User, Hash } from "lucide-react";
+import { QRCodeSVG, QRCodeCanvas } from "qrcode.react";
+import {
+  CalendarDays,
+  Clock,
+  MapPin,
+  ShieldCheck,
+  User,
+  Hash,
+  Download,
+} from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { useToast } from "../context/ToastContext";
 import { formatDate, eventStatus } from "../utils/format";
 import { StatusBadge } from "./TicketCard";
+import { downloadTicketImage } from "../utils/ticketImage";
 
 export default function QRCodeTicket({ registration, open, onClose }) {
   const { getEvent, profile } = useApp();
+  const toast = useToast();
+  const qrCanvasRef = useRef(null);
   if (!registration || !open) return null;
   const event = getEvent(registration.eventId);
   if (!event) return null;
 
   const payload = `CAMPUSHUB|${registration.regId}|${event.title}|${profile?.id || ""}`;
+
+  const handleDownload = () => {
+    try {
+      downloadTicketImage({
+        event,
+        registration,
+        qrCanvas: qrCanvasRef.current,
+      });
+      toast("Ticket downloaded as image.", "success");
+    } catch {
+      toast("Download failed — please try again.", "error");
+    }
+  };
 
   return (
     <Modal open={open} onClose={onClose} title="Digital Ticket" maxWidth="max-w-md">
@@ -46,12 +72,27 @@ export default function QRCodeTicket({ registration, open, onClose }) {
             <div className="mt-2.5">
               <StatusBadge status={registration.status} />
             </div>
+            <button onClick={handleDownload} className="btn-gradient mt-4 h-11 w-full">
+              <Download className="h-4 w-4" />
+              Download Ticket
+            </button>
             <p className="mt-4 rounded-xl bg-violet-50 px-4 py-2.5 text-center text-[12px] font-medium leading-relaxed text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
               <ShieldCheck className="mr-1 inline h-4 w-4 -translate-y-px" />
               Present your QR code at the venue entry for smooth verification.
             </p>
           </div>
         </div>
+      </div>
+
+      <div aria-hidden="true" style={{ position: "absolute", left: -9999, top: 0 }}>
+        <QRCodeCanvas
+          ref={qrCanvasRef}
+          value={payload}
+          size={220}
+          level="M"
+          bgColor="#ffffff"
+          fgColor="#05091b"
+        />
       </div>
     </Modal>
   );

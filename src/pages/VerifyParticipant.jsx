@@ -16,7 +16,17 @@ import {
 import { useApp } from "../context/AppContext";
 import { useToast } from "../context/ToastContext";
 import { AvatarInitials, StatusBadge } from "../components/TicketCard";
+import QrScanner from "../components/QrScanner";
 import { formatDate, timeAgo } from "../utils/format";
+
+function extractRegId(raw) {
+  const value = String(raw || "").trim();
+  if (/^CAMPUSHUB\|/i.test(value)) {
+    const [, regId] = value.split("|");
+    return (regId || "").trim();
+  }
+  return value;
+}
 
 export default function VerifyParticipant() {
   const { getRegistration, getEvent, markAttendance, addNotification, registrations } =
@@ -24,6 +34,7 @@ export default function VerifyParticipant() {
   const toast = useToast();
   const [regIdInput, setRegIdInput] = useState("");
   const [result, setResult] = useState(null);
+  const [scanOpen, setScanOpen] = useState(false);
 
   const recentCheckIns = useMemo(
     () =>
@@ -62,6 +73,14 @@ export default function VerifyParticipant() {
     });
   };
 
+  const handleScan = (decoded) => {
+    setScanOpen(false);
+    const regId = extractRegId(decoded);
+    if (!regId) return;
+    setRegIdInput(regId);
+    verify(regId);
+  };
+
   return (
     <div className="mx-auto w-full max-w-[900px] px-4 pb-16 pt-8 sm:px-6 lg:px-8">
       <header className="text-center animate-fade-in">
@@ -73,8 +92,8 @@ export default function VerifyParticipant() {
           Gate check-in
         </h1>
         <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-          Enter the registration ID printed on the student's QR ticket to
-          verify and check them in.
+          Scan the student's QR ticket with your camera, or enter the
+          registration ID to verify and check them in.
         </p>
       </header>
 
@@ -83,20 +102,36 @@ export default function VerifyParticipant() {
           e.preventDefault();
           verify();
         }}
-        className="card mx-auto mt-7 flex max-w-lg flex-col gap-3 p-4 sm:flex-row animate-slide-up"
+        className="card mx-auto mt-7 flex max-w-lg flex-col gap-3 p-4 animate-slide-up sm:flex-row"
       >
         <input
           value={regIdInput}
           onChange={(e) => setRegIdInput(e.target.value)}
           placeholder="REG-2026-0001"
           aria-label="Registration ID"
-          className="input h-12 flex-1 font-mono font-semibold uppercase tracking-wider"
+          className="input h-12 min-w-0 flex-1 font-mono font-semibold uppercase tracking-wider"
         />
-        <button type="submit" className="btn-gradient h-12 shrink-0 px-6">
+        <button type="submit" className="btn-gradient h-12 shrink-0 px-5">
           <ScanLine className="h-4 w-4" />
           Verify
         </button>
+        <button
+          type="button"
+          onClick={() => setScanOpen((v) => !v)}
+          className={`h-12 shrink-0 rounded-xl px-5 text-sm font-bold transition ${
+            scanOpen
+              ? "border border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-300"
+              : "btn-gradient"
+          }`}
+        >
+          <ScanLine className="h-4 w-4" />
+          {scanOpen ? "Stop" : "Scan QR"}
+        </button>
       </form>
+
+      {scanOpen && (
+        <QrScanner onScan={handleScan} onClose={() => setScanOpen(false)} />
+      )}
 
       {result?.error && (
         <div className="card mx-auto mt-5 flex max-w-lg items-center gap-3.5 border-red-200 p-5 animate-scale-in dark:border-red-500/25">
