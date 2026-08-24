@@ -35,7 +35,7 @@ const STATUSES = ["Upcoming", "Draft", "Completed", "Cancelled"];
 export default function CreateEvent() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getEvent, addEvent, updateEvent } = useApp();
+  const { getEvent, addEvent, updateEvent, loading } = useApp();
   const toast = useToast();
   const [form, setForm] = useState(BLANK);
   const [errors, setErrors] = useState({});
@@ -131,6 +131,36 @@ export default function CreateEvent() {
     () => CATEGORY_STYLES[form.category] || CATEGORY_STYLES.Other,
     [form.category]
   );
+
+  if (editing && !existing) {
+    return (
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col items-center px-4 py-24 text-center animate-fade-in">
+        {loading ? (
+          <>
+            <span className="h-10 w-10 animate-spin rounded-full border-4 border-violet-200 border-t-violet-600" />
+            <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+              Loading event details…
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+              Event not found
+            </h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              This event may have been removed or the link is incorrect.
+            </p>
+            <button
+              onClick={() => navigate("/organizer/events")}
+              className="btn-gradient mt-6 px-6 py-3"
+            >
+              Back to My Events
+            </button>
+          </>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-8 sm:px-6 lg:px-8">

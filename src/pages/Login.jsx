@@ -59,7 +59,7 @@ export default function Login() {
     setBusy(true);
     setError("");
     try {
-      const res = await api("/login.php", {
+      const res = await api("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password, role }),
       });
@@ -72,7 +72,7 @@ export default function Login() {
         replace: true,
       });
     } catch {
-      setError("Cannot reach the server. Make sure XAMPP (Apache + MySQL) is running and setup.php was opened once.");
+      setError("Cannot reach the server. Make sure the API server and MongoDB are running.");
     } finally {
       setBusy(false);
     }

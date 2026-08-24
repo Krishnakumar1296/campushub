@@ -1,5 +1,5 @@
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { CheckCircle2, XCircle, Info, AlertTriangle, X } from "lucide-react";
 
 const ToastContext = createContext(null);
@@ -41,6 +41,14 @@ export function ToastProvider({ children }) {
     clearTimeout(timers.current[id]);
     delete timers.current[id];
   }, []);
+
+  useEffect(
+    () => () => {
+      Object.values(timers.current).forEach(clearTimeout);
+      timers.current = {};
+    },
+    []
+  );
 
   const toast = useCallback(
     (message, type = "success", duration = 3800) => {

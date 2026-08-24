@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Lock,
   Mail,
-  Megaphone,
   ShieldCheck,
   Sparkles,
   UserPlus,
@@ -28,17 +27,6 @@ const ROLE_META = {
     icon: GraduationCap,
     gradient: "from-violet-500 to-indigo-600",
   },
-  organizer: {
-    label: "Organizer",
-    tagline: "Run events end-to-end",
-    perks: [
-      "Create & manage event listings",
-      "Verify attendees with QR check-in",
-      "Deep analytics on registrations",
-    ],
-    icon: Megaphone,
-    gradient: "from-fuchsia-500 to-purple-700",
-  },
 };
 
 const DEPARTMENTS = [
@@ -57,7 +45,6 @@ const YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"];
 export default function SignUp() {
   const { loginAs } = useApp();
   const navigate = useNavigate();
-  const [role, setRole] = useState("student");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -70,7 +57,7 @@ export default function SignUp() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const meta = ROLE_META[role];
+  const meta = ROLE_META.student;
   const set = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }));
     setError("");
@@ -98,15 +85,15 @@ export default function SignUp() {
     setBusy(true);
     setError("");
     try {
-      const res = await api("/signup.php", {
+      const res = await api("/auth/signup", {
         method: "POST",
         body: JSON.stringify({
           name: form.name.trim(),
           email: form.email.trim(),
           password: form.password,
-          role,
-          department: role === "student" ? form.department : "",
-          year: role === "student" ? form.year : "",
+          role: "student",
+          department: form.department,
+          year: form.year,
         }),
       });
       if (!res.ok) {
@@ -114,11 +101,11 @@ export default function SignUp() {
         return;
       }
       loginAs(res.user);
-      navigate(res.user.role === "organizer" ? "/organizer" : "/events", {
+      navigate("/events", {
         replace: true,
       });
     } catch {
-      setError("Cannot reach the server. Make sure XAMPP (Apache + MySQL) is running.");
+      setError("Cannot reach the server. Make sure the API server and MongoDB are running.");
     } finally {
       setBusy(false);
     }
@@ -149,8 +136,8 @@ export default function SignUp() {
               It takes a minute.
             </h2>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/85">
-              Create a free account as a student or an organizer and unlock
-              your campus workspace.
+              Create a free student account and unlock your campus workspace —
+              events, QR tickets and more.
             </p>
           </div>
           <ul className="space-y-3">
@@ -167,56 +154,11 @@ export default function SignUp() {
 
         <section className="p-7 sm:p-9">
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-            Create your account
+            Create your student account
           </h1>
           <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400">
-            Pick an account type to get started.
+            Sign up to discover events, grab tickets and track your passes.
           </p>
-
-          <div className="mt-6 grid grid-cols-2 gap-3" role="tablist" aria-label="Account type">
-            {Object.keys(ROLE_META).map((r) => {
-              const m = ROLE_META[r];
-              const Icon = m.icon;
-              const active = role === r;
-              return (
-                <button
-                  key={r}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => {
-                    setRole(r);
-                    setError("");
-                  }}
-                  className={`rounded-xl border p-4 text-left transition-all duration-200 active:scale-[0.98] ${
-                    active
-                      ? `border-transparent bg-gradient-to-br ${m.gradient} text-white shadow-lg shadow-violet-500/25`
-                      : "border-slate-200 hover:border-violet-300 dark:border-white/[0.08] dark:hover:border-violet-400/40"
-                  }`}
-                >
-                  <Icon
-                    className={`h-5 w-5 ${
-                      active ? "text-white" : "text-violet-500 dark:text-violet-400"
-                    }`}
-                  />
-                  <span
-                    className={`mt-2 block text-sm font-bold ${
-                      active ? "text-white" : "text-slate-800 dark:text-slate-100"
-                    }`}
-                  >
-                    {m.label}
-                  </span>
-                  <span
-                    className={`mt-0.5 block text-[11px] leading-snug ${
-                      active ? "text-white/80" : "text-slate-400"
-                    }`}
-                  >
-                    {m.tagline}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
 
           <form onSubmit={submit} noValidate className="mt-6 space-y-4">
             {error && (
@@ -254,32 +196,30 @@ export default function SignUp() {
               </div>
             </div>
 
-            {role === "student" && (
-              <div className="grid grid-cols-2 gap-3 animate-fade-in">
-                <div>
-                  <label className="label">Department</label>
-                  <select value={form.department} onChange={set("department")} className="input h-11">
-                    <option value="">Select…</option>
-                    {DEPARTMENTS.map((d) => (
-                      <option key={d} value={d}>
-                        {d}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Year</label>
-                  <select value={form.year} onChange={set("year")} className="input h-11">
-                    <option value="">Select…</option>
-                    {YEARS.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="label">Department</label>
+                <select value={form.department} onChange={set("department")} className="input h-11">
+                  <option value="">Select…</option>
+                  {DEPARTMENTS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
+              <div>
+                <label className="label">Year</label>
+                <select value={form.year} onChange={set("year")} className="input h-11">
+                  <option value="">Select…</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -321,7 +261,7 @@ export default function SignUp() {
 
             <button type="submit" disabled={busy} className="btn-gradient h-12 w-full">
               <UserPlus className="h-4 w-4" />
-              {busy ? "Creating account…" : `Create ${meta.label.toLowerCase()} account`}
+              {busy ? "Creating account…" : "Create student account"}
               <ArrowRight className="h-4 w-4" />
             </button>
           </form>

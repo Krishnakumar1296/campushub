@@ -34,20 +34,20 @@ export function AppProvider({ children }) {
   }, [theme]);
 
   const refreshEvents = useCallback(async () => {
-    const data = await api("/events.php");
+    const data = await api("/events");
     setEvents(data);
     return data;
   }, []);
 
   const refreshRegistrations = useCallback(async () => {
-    const data = await api("/registrations.php");
+    const data = await api("/registrations");
     setRegistrations(data);
     return data;
   }, []);
 
   const refreshNotifications = useCallback(async (email) => {
     if (!email) return;
-    const data = await api(`/notifications.php?email=${encodeURIComponent(email)}`);
+    const data = await api(`/notifications?email=${encodeURIComponent(email)}`);
     setNotifications(data);
     return data;
   }, []);
@@ -72,7 +72,7 @@ export function AppProvider({ children }) {
 
   useEffect(() => {
     if (!auth?.id) return;
-    api(`/profile.php?id=${encodeURIComponent(auth.id)}`)
+    api(`/profile/${encodeURIComponent(auth.id)}`)
       .then((res) => {
         if (res?.ok && res.profile) {
           setProfile((p) => ({
@@ -107,7 +107,7 @@ export function AppProvider({ children }) {
   const addNotification = useCallback(
     async (n) => {
       try {
-        await api("/notifications.php", {
+        await api("/notifications", {
           method: "POST",
           body: JSON.stringify({
             userEmail: auth?.email || null,
@@ -125,7 +125,7 @@ export function AppProvider({ children }) {
   const registerForEvent = async (eventId) => {
     const event = getEvent(eventId);
     if (!event) return { ok: false, error: "Event not found." };
-    const res = await api("/register.php", {
+    const res = await api("/registrations", {
       method: "POST",
       body: JSON.stringify({
         eventId: event.id,
@@ -151,7 +151,7 @@ export function AppProvider({ children }) {
   const markAttendance = async (regId) => {
     let res;
     try {
-      res = await api("/checkin.php", {
+      res = await api("/registrations/checkin", {
         method: "POST",
         body: JSON.stringify({ regId }),
       });
@@ -174,7 +174,7 @@ export function AppProvider({ children }) {
 
   const addEvent = async (data) => {
     try {
-      const res = await api("/events.php", {
+      const res = await api("/events", {
         method: "POST",
         body: JSON.stringify(data),
       });
@@ -190,7 +190,7 @@ export function AppProvider({ children }) {
   };
 
   const updateEvent = async (id, data) => {
-    await api(`/events.php?id=${encodeURIComponent(id)}`, {
+    await api(`/events/${encodeURIComponent(id)}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -202,7 +202,7 @@ export function AppProvider({ children }) {
 
   const deleteEvent = async (id) => {
     try {
-      const res = await api(`/events.php?id=${encodeURIComponent(id)}`, {
+      const res = await api(`/events/${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
       if (!res.ok) return false;
@@ -215,7 +215,7 @@ export function AppProvider({ children }) {
   };
 
   const updateProfile = async (data) => {
-    await api("/profile.php", {
+    await api("/profile", {
       method: "PUT",
       body: JSON.stringify({ id: auth?.id || profile?.id || "", ...data }),
     });
@@ -229,7 +229,7 @@ export function AppProvider({ children }) {
       list.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
     if (auth?.email) {
-      api("/notifications.php", {
+      api("/notifications", {
         method: "PATCH",
         body: JSON.stringify({ id, email: auth.email }),
       }).catch(() => {});
@@ -239,7 +239,7 @@ export function AppProvider({ children }) {
   const markAllNotificationsRead = async () => {
     setNotifications((list) => list.map((n) => ({ ...n, read: true })));
     if (auth?.email) {
-      api("/notifications.php", {
+      api("/notifications", {
         method: "PATCH",
         body: JSON.stringify({ all: true, email: auth.email }),
       }).catch(() => {});
@@ -251,15 +251,29 @@ export function AppProvider({ children }) {
 
   const loginAs = (user) => {
     setAuth(user);
+    setProfile({
+      id: user.id || "",
+      name: user.name || "",
+      email: user.email || "",
+      role: titleCase(user.role),
+      phone: user.phone || "",
+      department: user.department || "",
+      year: user.year || "",
+      bio: "",
+    });
     setView(user.role);
     return user;
   };
 
-  const logout = () => setAuth(null);
+  const logout = () => {
+    setAuth(null);
+    setProfile(null);
+    setNotifications([]);
+  };
 
   const resetDemoData = async () => {
     try {
-      await api("/reset.php");
+      await api("/reset");
     } catch (err) {
       console.error(err.message);
     }

@@ -1,5 +1,5 @@
 export const API_BASE =
-  import.meta.env.VITE_API_BASE || "http://localhost/yamini/backend";
+  import.meta.env.VITE_API_BASE || "/api";
 
 export async function api(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {

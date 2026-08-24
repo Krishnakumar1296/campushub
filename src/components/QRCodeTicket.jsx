@@ -11,7 +11,7 @@ export default function QRCodeTicket({ registration, open, onClose }) {
   const event = getEvent(registration.eventId);
   if (!event) return null;
 
-  const payload = `CAMPUSHUB|${registration.regId}|${event.title}|${profile.id}`;
+  const payload = `CAMPUSHUB|${registration.regId}|${event.title}|${profile?.id || ""}`;
 
   return (
     <Modal open={open} onClose={onClose} title="Digital Ticket" maxWidth="max-w-md">

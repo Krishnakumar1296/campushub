@@ -244,12 +244,16 @@ export default function EventDetails() {
               </div>
 
               <div className="space-y-2.5 border-t border-dashed border-slate-200 pt-4 text-[13px] dark:border-white/[0.08]">
-                <Row label="Registration deadline" value={formatDate(event.registrationDeadline)} />
+                <Row label="Registration deadline" value={event.registrationDeadline ? formatDate(event.registrationDeadline) : "No deadline"} />
                 <Row
                   label="Status"
                   value={
-                    deadlineDays > 0
-                      ? `Closes in ${deadlineDays} day${deadlineDays === 1 ? "" : "s"}`
+                    event.registrationDeadline
+                      ? deadlineDays > 0
+                        ? `Closes in ${deadlineDays} day${deadlineDays === 1 ? "" : "s"}`
+                        : "Closed"
+                      : daysUntil(event.date) >= 0
+                      ? "Open until event day"
                       : "Closed"
                   }
                 />
