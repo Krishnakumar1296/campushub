@@ -232,15 +232,17 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
-            New to CampusHub?{" "}
-            <Link
-              to="/account"
-              className="font-bold text-violet-600 transition hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
-            >
-              Create an account
-            </Link>
-          </p>
+          {role === "student" && (
+            <p className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+              New to CampusHub?{" "}
+              <Link
+                to="/account"
+                className="font-bold text-violet-600 transition hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
+              >
+                Create an account
+              </Link>
+            </p>
+          )}
         </section>
       </div>
     </div>
